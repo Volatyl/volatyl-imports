@@ -105,23 +105,34 @@ def add_user(user: Usertype):
 
 # pydantic class for reviews
 class Reviewtype(BaseModel):
-    name: str
-    email: str
+    review: str
+    user_id: int
+    car_id: int
 
 
 # code to handle reviews
-@app.get('/users', tags=['Users'])
-def get_users():
+@app.get('/reviews', tags=['Reviews'])
+def get_review():
     session = Session()
-    users = session.query(User).all()
-    return users
+    reviews = session.query(Review).all()
+    return reviews
 
 
-@app.post('/users/{id}', tags=['Users'])
-def add_user(user: Usertype):
+@app.post('/reviews/{id}', tags=['Reviews'])
+def add_review(review: Reviewtype):
     session = Session()
-    user1 = User(name=user.name, email=user.email)
-    session.add(user1)
+    review1 = Review(review=review.review,
+                     user_id=review.user_id, car_id=review.car_id)
+    session.add(review1)
     session.commit()
     session.close()
-    return 'User added successfully'
+    return 'Review added successfully'
+
+
+@app.delete('/reviews/{}', tags=['Reviews'])
+def delete_review(id: int):
+    session = Session()
+    session.query(Review).filter_by(id=id).delete()
+    session.commit()
+    session.close()
+    return 'Review deleted successfully'
