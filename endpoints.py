@@ -136,3 +136,24 @@ def delete_review(id: int):
     session.commit()
     session.close()
     return 'Review deleted successfully'
+
+# pydantic code for relationship
+
+
+class Car_user(BaseModel):
+    user_id = int
+    car_id = int
+
+# code to add user & car relationship
+
+
+@app.post('/', tags=['relationship'])
+def add_rel(details: Car_user):
+    session = Session()
+    car = session.query(Car).filter_by(id=details.car_id).first()
+    user = session.query(User).filter_by(id=details.user_id).first()
+
+    car.users.append(user)
+    session.commit()
+    session.commit()
+    session.close()

@@ -28,22 +28,6 @@ class User(Base):
         return f'Name: {self.name}'
 
 
-class Review(Base):
-    __tablename__ = 'reviews'
-
-    id = Column(Integer(), primary_key=True)
-    review = Column(String())
-
-    user_id = Column(Integer(), ForeignKey('users.id'))
-    car_id = Column(Integer(), ForeignKey('cars.id'))
-
-    cars = relationship('Car', back_populates='review')
-    user = relationship('User', back_populates='review')
-
-    def __repr__(self):
-        return f'Review: {self.review}'
-
-
 class Car(Base):
     __tablename__ = 'cars'
 
@@ -61,3 +45,19 @@ class Car(Base):
 
     def __repr__(self):
         return f'Model: {self.model}, Year: {self.year}'
+
+
+class Review(Base):
+    __tablename__ = 'reviews'
+
+    id = Column(Integer(), primary_key=True)
+    review = Column(String())
+
+    user_id = Column(Integer(), ForeignKey('users.id'))
+    car_id = Column(Integer(), ForeignKey('cars.id'))
+
+    cars = relationship('Car', back_populates='review')
+    user = relationship('User', back_populates='review')
+
+    def __repr__(self):
+        return f'Review: {self.review}'
