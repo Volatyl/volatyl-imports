@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel
 from models import Car, engine, User, Review, user_car
+from typing import Optional, List
 
 app = FastAPI()
 
@@ -42,32 +43,28 @@ def add_car(car: Cartype):
     return 'Car added successfully'
 
 
-@app.put('/cars/{id}', tags=['Cars'])
-def edit_car(id: int, car: Cartype):
+class Cartype2(BaseModel):
+    brand: Optional[str] = None
+    model: Optional[str]
+    year: Optional[int] = None
+    mileage: Optional[int]
+    price: Optional[int]
+    cc: Optional[int]
+    description: Optional[str]
+
+
+@app.patch('/cars/update/{id}', tags=['Cars'])
+def edit_car(id: int, car: Cartype2):
     session = Session()
     car1 = session.query(Car).filter_by(id=id).first()
     if car1:
-        if car.brand:
-            car1.brand = car.brand
-        if car.model:
-            car1.model = car.model
-        if car.year:
-            car1.year = car.year
-        if car.mileage:
-            car1.mileage = car.mileage
-        if car.price:
-            car1.price = car.price
-        if car.cc:
-            car1.cc = car.cc
-        if car.description:
-            car1.description = car.description
+        for attr, value in car.dict(exclude_unset=True).items():
+            setattr(car1, attr, value)
 
         session.commit()
-        session.close()
+        # session.close()
         return 'Car updated successfully'
-    else:
-        session.close()
-        return 'Car not found'
+    return 'Car not found'
 
 
 @app.delete('/cars/{id}', tags=['Cars'])
@@ -129,7 +126,7 @@ def add_review(review: Reviewtype):
     return 'Review added successfully'
 
 
-@app.delete('/reviews/{}', tags=['Reviews'])
+@app.delete('/reviews/{id}', tags=['Reviews'])
 def delete_review(id: int):
     session = Session()
     session.query(Review).filter_by(id=id).delete()
