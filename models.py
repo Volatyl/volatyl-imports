@@ -32,13 +32,17 @@ class Car(Base):
     __tablename__ = 'cars'
 
     id = Column(Integer(), primary_key=True)
+    image = Column(String())
     brand = Column(String())
     model = Column(String())
     year = Column(Integer())
     mileage = Column(Integer())
     price = Column(Integer())
     cc = Column(Integer())
+    usage = Column(String())
+    drive = Column(String())
     description = Column(String())
+    
 
     review = relationship('Review', back_populates='cars')
     users = relationship('User', secondary='user_car', back_populates='cars')

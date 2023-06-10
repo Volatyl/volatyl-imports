@@ -1,15 +1,27 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from sqlalchemy.orm import sessionmaker
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from models import Car, engine, User, Review, user_car
 from typing import Optional, List
 
 app = FastAPI()
 
+
+app.add_middleware(
+    CORSMiddleware,
+    # Replace "*" with the specific origins you want to allow
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
+
 # pydantic classes for cars
 
 
 class Cartype(BaseModel):
+    image: str
     brand: str
     model: str
     year: int
@@ -17,6 +29,8 @@ class Cartype(BaseModel):
     price: int
     cc: int
     description: str
+    usage: str
+    drive: str
 
 
 Session = sessionmaker(bind=engine)
@@ -32,11 +46,10 @@ def get_cars():
     return cars
 
 
-@app.post('/cars', tags=['Cars'])
+@app.post('/cars/add', tags=['Cars'])
 def add_car(car: Cartype):
     session = Session()
-    car1 = Car(brand=car.brand, model=car.model, year=car.year, mileage=car.mileage,
-               price=car.price, cc=car.cc, description=car.description)
+    car1 = Car(**dict(car))
     session.add(car1)
     session.commit()
     session.close()
@@ -44,27 +57,39 @@ def add_car(car: Cartype):
 
 
 class Cartype2(BaseModel):
-    brand: Optional[str] = None
+    image: Optional[str]
+    brand: Optional[str]
     model: Optional[str]
-    year: Optional[int] = None
+    year: Optional[int]
     mileage: Optional[int]
     price: Optional[int]
     cc: Optional[int]
     description: Optional[str]
+    usage: Optional[str]
+    drive: Optional[str]
 
 
-@app.patch('/cars/update/{id}', tags=['Cars'])
-def edit_car(id: int, car: Cartype2):
+# @app.patch('/edit/{id}', tags=['Cars'])
+# def edit_car(id: int, car: Cartype2):
+#     session = Session()
+#     car1 = session.query(Car).filter_by(id=id).first()
+#     if not car1:
+#         raise HTTPException(status_code=400, detail='Car doesnt exist')
+#     for key, value in car.dict(exclude_unset=True).items():
+#         setattr(car1, key, value)
+#     session.commit()
+#     return car1
+
+@app.put('/edit/{id}', tags=['Cars'])
+def edit_car(id: int, car: Cartype):
     session = Session()
     car1 = session.query(Car).filter_by(id=id).first()
-    if car1:
-        for attr, value in car.dict(exclude_unset=True).items():
-            setattr(car1, attr, value)
-
-        session.commit()
-        # session.close()
-        return 'Car updated successfully'
-    return 'Car not found'
+    if not car1:
+        raise HTTPException(status_code=400, detail='Car doesnt exist')
+    for key, value in car.dict(exclude_unset=True).items():
+        setattr(car1, key, value)
+    session.commit()
+    return car1
 
 
 @app.delete('/cars/{id}', tags=['Cars'])
@@ -151,6 +176,5 @@ def add_rel(details: Car_user):
     user = session.query(User).filter_by(id=details.user_id).first()
 
     car.users.append(user)
-    session.commit()
     session.commit()
     session.close()
