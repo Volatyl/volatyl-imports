@@ -39,6 +39,11 @@ Session = sessionmaker(bind=engine)
 # code to handle cars
 
 
+@app.get('/', tags=['Cars'])
+def get_home():
+    return 'Welcome to Volatyl Ventures'
+
+
 @app.get('/cars', tags=['Cars'])
 def get_cars():
     session = Session()
