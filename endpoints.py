@@ -11,7 +11,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     # Replace "*" with the specific origins you want to allow
-    allow_origins=["http://localhost:51"],
+    allow_origins=[
+        "https://64851384a16db53a36b04e09--effortless-druid-e6a082.netlify.app"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
